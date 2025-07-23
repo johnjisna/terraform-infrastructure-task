@@ -1,8 +1,3 @@
-variable "iam_user_name" {
-  description = "The name of the IAM user"
-  type        = string
-}
-
 variable "iam_policies" {
   description = "Map of policy names to policy file paths"
   type        = map(string)
@@ -10,11 +5,6 @@ variable "iam_policies" {
 
 variable "resource_arn_mapping" {
   description = "Mapping of policy names to the corresponding resource ARNs"
-  type        = map(string)
-}
-
-variable "user_policy_mapping" {
-  description = "Mapping of policies to attach to the IAM user"
   type        = map(string)
 }
 

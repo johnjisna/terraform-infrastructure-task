@@ -185,21 +185,9 @@ variable "trusted_services" {
   type        = list(string)
 }
 
-variable "iam_user_name_backend" {
-  description = "Name of the IAM user backend"
+variable "iam_instance_role_name" {
+  description = "Name of the IAM role to attach to the EC2 instance profile"
   type        = string
-
 }
 
-variable "iam_user_name_frontend" {
-  description = "Name of the IAM user frontend"
-  type        = string
-
-}
-
-variable "iam_role_name_backend" {
-  description = "Name of the IAM user backend"
-  type        = string
-
-}
 

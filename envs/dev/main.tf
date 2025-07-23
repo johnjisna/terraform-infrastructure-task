@@ -86,8 +86,6 @@ module "s3" {
   source                     = "../../modules/s3"
   bucket_name                = var.bucket_name
   cloudfront_distribution_id = module.cdn.cloudfront_distribution_id
-  iam_user_name              = module.iam_frontend.iam_user_name
-  iam_user_arn               = module.iam_frontend.iam_user_arn
   policy_type                = var.policy_type
 
 }
@@ -100,56 +98,27 @@ module "cdn" {
   acm_certificate_arn         = var.acm_certificate_arn
 }
 
-module "iam_backend" {
+module "iam_instance_profile" {
   source           = "../../modules/iam"
-  iam_user_name    = var.iam_user_name_backend
-  iam_role_name    = var.iam_role_name_backend
+  iam_role_name    = var.iam_instance_role_name
   trusted_services = var.trusted_services
 
   iam_policies = {
-    "jenkins-user-policy"   = "policies/jenkins-user-policy.json",
-    "secret-manager-policy" = "policies/secret-manager-policy.json",
-    "ecr-read-policy"       = "policies/ecr-read-policy.json"
-  }
-
-  user_policy_mapping = {
-    "jenkins-user-policy"   = module.ecr.repository_arn 
-    "secret-manager-policy" = module.secrets.secret_arn
+    "s3-read-write-policy"     = "policies/s3_policy.json",
+    "ecr-pull-policy"          = "policies/ecr-read-policy.json",
+    "secretsmanager-readonly"  = "policies/secret-manager-policy.json"
   }
 
   role_policy_mapping = {
-    "ecr-read-policy"       = module.ecr.repository_arn
-  }
-
-
-  resource_arn_mapping = {
-    "jenkins-user-policy"   = module.ecr.repository_arn
-    "secret-manager-policy" = module.secrets.secret_arn
-    "ecr-read-policy"       = module.ecr.repository_arn
-  }
-}
-
-
-module "iam_frontend" {
-  source        = "../../modules/iam"
-  iam_user_name = var.iam_user_name_frontend
-
-
-  iam_policies = {
-    "s3_policy"  = "policies/s3_policy.json",
-    "cdn_policy" = "policies/cdn_policy.json",
-
-  }
-
-
-
-  user_policy_mapping = {
-    "s3_policy"  = module.s3.bucket_arn,
-    "cdn_policy" = module.cdn.cdn_arn
+    "s3-read-write-policy"     = module.s3.bucket_arn,
+    "ecr-pull-policy"          = module.ecr.repository_arn,
+    "secretsmanager-readonly"  = module.secrets.secret_arn
   }
 
   resource_arn_mapping = {
-    "s3_policy"  = module.s3.bucket_arn,
-    "cdn_policy" = module.cdn.cdn_arn
+    "s3-read-write-policy"     = module.s3.bucket_arn,
+    "ecr-pull-policy"          = module.ecr.repository_arn,
+    "secretsmanager-readonly"  = module.secrets.secret_arn
   }
 }
+

@@ -1,9 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-resource "aws_iam_user" "user" {
-  name = var.iam_user_name
-}
-
 resource "aws_iam_policy" "policies" {
   for_each    = var.iam_policies
   name        = each.key
@@ -11,12 +7,6 @@ resource "aws_iam_policy" "policies" {
   policy      = templatefile("${path.module}/${each.value}", {
     resource_arn = var.resource_arn_mapping[each.key]
   })
-}
-
-resource "aws_iam_user_policy_attachment" "policy_attachments" {
-  for_each   = var.user_policy_mapping
-  user       = aws_iam_user.user.name
-  policy_arn = aws_iam_policy.policies[each.key].arn
 }
 
 resource "aws_iam_role" "role" {

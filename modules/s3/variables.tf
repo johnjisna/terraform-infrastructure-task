@@ -13,41 +13,30 @@ variable "bucket_tag_name" {
 variable "block_public_acls" {
   description = "Whether to block public ACLs"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "block_public_policy" {
   description = "Whether to block public bucket policies"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "ignore_public_acls" {
   description = "Whether to ignore public ACLs"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "restrict_public_buckets" {
   description = "Whether to restrict public buckets"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "cloudfront_distribution_id" {
   type        = string
   description = "CloudFront distribution ID"
-}
-
-variable "iam_user_name" {
-  description = "Name of iam user"
-  type        = string
-}
-
-variable "iam_user_arn" {
-  description = "Name of iam user"
-  type        = string
-  default = "null"
 }
 
 variable "policy_type" {

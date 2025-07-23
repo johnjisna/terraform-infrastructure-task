@@ -16,25 +16,6 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   restrict_public_buckets = var.restrict_public_buckets
 }
 
-# Policy for IAM user access (s3:GetObject)
-resource "aws_s3_bucket_policy" "iam_user_policy" {
-  count  = var.policy_type == "iam_user" ? 1 : 0
-  bucket = aws_s3_bucket.s3_bucket.bucket
-
-  policy = jsonencode({
-    Version   = "2012-10-17",
-    Statement = [
-      {
-        Sid       = "AllowIAMUserGetObject",
-        Effect    = "Allow",
-        Principal = { AWS = var.iam_user_arn },
-        Action    = ["s3:GetObject"],
-        Resource  = ["arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/*"]
-      }
-    ]
-  })
-}
-
 # Policy for CloudFront access (s3:GetObject with condition)
 resource "aws_s3_bucket_policy" "cloudfront_policy" {
   count  = var.policy_type == "cloudfront" ? 1 : 0
@@ -61,37 +42,3 @@ resource "aws_s3_bucket_policy" "cloudfront_policy" {
   })
 }
 
-# Policy for public access with additional IAM user permissions
-resource "aws_s3_bucket_policy" "public_iam_policy" {
-  count  = var.policy_type == "public_iam" ? 1 : 0
-  bucket = aws_s3_bucket.s3_bucket.bucket
-
-  policy = jsonencode({
-    Version   = "2012-10-17",
-    Statement = [
-      // Public GetObject Access
-      {
-        Sid       = "AllowPublicGetObject",
-        Effect    = "Allow",
-        Principal = "*",
-        Action    = "s3:GetObject",
-        Resource  = "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/*"
-      },
-      // IAM User Put, Delete, and List Access
-      {
-        Sid       = "AllowIAMUserPutDeleteList",
-        Effect    = "Allow",
-        Principal = { AWS = var.iam_user_arn },
-        Action    = [
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket"
-        ],
-        Resource  = [
-          "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}",
-          "arn:aws:s3:::${aws_s3_bucket.s3_bucket.bucket}/*"
-        ]
-      }
-    ]
-  })
-}

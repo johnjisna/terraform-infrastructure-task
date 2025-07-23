@@ -2,16 +2,21 @@
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "ECRPullAccess",
       "Effect": "Allow",
       "Action": [
         "ecr:GetDownloadUrlForLayer",
         "ecr:BatchGetImage",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:DescribeRepositories",
-        "ecr:DescribeImages",
-        "ecr:GetAuthorizationToken"
+        "ecr:BatchCheckLayerAvailability"
       ],
       "Resource": "${resource_arn}"
+    },
+    {
+      "Sid": "ECRAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
     }
   ]
 }
+
