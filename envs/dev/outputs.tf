@@ -7,12 +7,13 @@ output "vpc_id" {
 }
 
 output "public_asg_name" {
-  value = module.ec2.public_asg_name
+  value = module.ec2.asg_names["public"]
 }
 
 output "private_asg_name" {
-  value = module.ec2.private_asg_name
+  value = module.ec2.asg_names["private"]
 }
+
 
 output "rds_endpoint" {
   value = module.rds_postgres.rds_endpoint

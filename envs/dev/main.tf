@@ -7,6 +7,7 @@ module "vpc" {
 }
 
 
+
 module "alb" {
   source = "../../modules/alb"
 
@@ -14,20 +15,65 @@ module "alb" {
   subnet_ids          = module.vpc.public_subnet_ids
   vpc_id              = module.vpc.vpc_id
   alb_sg_id           = module.sg.alb_sg_id
+
+  tg_port                  = var.tg_port
+  tg_protocol              = var.tg_protocol
+  tg_health_check_interval = var.tg_health_check_interval
+  tg_health_check_timeout  = var.tg_health_check_timeout
+  tg_healthy_threshold     = var.tg_healthy_threshold
+  tg_unhealthy_threshold   = var.tg_unhealthy_threshold
+
+  target_group_configs = var.target_group_configs
 }
 
 module "ec2" {
   source = "../../modules/ec2"
 
-  image_id                 = var.image_id
-  instance_type           = var.instance_type
-  public_subnet_ids       = module.vpc.public_subnet_ids
-  private_subnet_ids      = module.vpc.private_subnet_ids
-  target_group_arns_public  = [module.alb.target_group_arn_public]
-  target_group_arns_private = [module.alb.target_group_arn_private]
-  ec2_public_sg_id 	   = module.sg.ec2_public_sg_id
-  ec2_private_sg_id        = module.sg.ec2_private_sg_id
+  ec2_configs = {
+    public = {
+      image_id          = var.image_id
+      instance_type     = var.instance_type
+      sg_id             = module.sg.ec2_public_sg_id
+      subnet_ids        = module.vpc.public_subnet_ids
+      target_group_arns = [module.alb.target_group_arn_public]
+      desired_capacity  = var.scale_desired_capacity
+      min_size          = var.scale_min_size
+      max_size          = var.scale_max_size
+      key_name          = "test-key"
+      user_data         = <<-EOF
+        #!/bin/bash
+        sudo apt-get update
+        sudo apt-get install -y nginx
+        sudo systemctl start nginx
+        sudo systemctl enable nginx
+        echo "Hello from $(hostname)" | sudo tee /var/www/html/index.html
+      EOF
+      iam_instance_profile = module.iam_instance_profile.iam_instance_profile_name
+    }
+
+    private = {
+      image_id          = var.image_id
+      instance_type     = var.instance_type
+      sg_id             = module.sg.ec2_private_sg_id
+      subnet_ids        = module.vpc.private_subnet_ids
+      target_group_arns = [module.alb.target_group_arn_private]
+      desired_capacity  = var.scale_desired_capacity
+      min_size          = var.scale_min_size
+      max_size          = var.scale_max_size
+      key_name          = "test-key"
+      user_data         = <<-EOF
+        #!/bin/bash
+        sudo apt-get update
+        sudo apt-get install -y nginx
+        sudo systemctl start nginx
+        sudo systemctl enable nginx
+        echo "Hello from $(hostname)" | sudo tee /var/www/html/index.html
+      EOF
+      iam_instance_profile = module.iam_instance_profile.iam_instance_profile_name
+    }
+  }
 }
+
 
 module "sg" {
   source    = "../../modules/sg"

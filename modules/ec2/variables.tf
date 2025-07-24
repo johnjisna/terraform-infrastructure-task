@@ -1,38 +1,17 @@
-variable "image_id" {
-  description = "AMI ID for EC2 instances"
-  type        = string
-}
-
-variable "instance_type" {
-  description = "EC2 instance type"
-  type        = string
-}
-
-variable "public_subnet_ids" {
-  description = "List of public subnet IDs"
-  type        = list(string)
-}
-
-variable "private_subnet_ids" {
-  description = "List of private subnet IDs"
-  type        = list(string)
-}
-
-variable "target_group_arns_public" {
-  description = "ALB Target Group ARNs for public instances"
-  type        = list(string)
-}
-
-variable "target_group_arns_private" {
-  description = "ALB Target Group ARNs for private instances"
-  type        = list(string)
-}
-
-variable "ec2_public_sg_id" {
-  type = string
-}
-
-variable "ec2_private_sg_id" {
-  type = string
+variable "ec2_configs" {
+  description = "Map of EC2 configuration blocks (public/private)"
+  type = map(object({
+    image_id            = string
+    instance_type       = string
+    sg_id               = string
+    subnet_ids          = list(string)
+    target_group_arns   = list(string)
+    desired_capacity    = number
+    min_size            = number
+    max_size            = number
+    user_data           = string
+    iam_instance_profile = string
+    key_name             = string
+  }))
 }
 

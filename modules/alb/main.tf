@@ -1,4 +1,4 @@
-resource "aws_lb" "this" {
+resource "aws_lb" "alb" {
   name               = var.lb_name
   internal           = false
   load_balancer_type = "application"
@@ -10,53 +10,35 @@ resource "aws_lb" "this" {
   }
 }
 
-resource "aws_lb_target_group" "public" {
-  name     = "tg-public"
-  port     = 80
-  protocol = "HTTP"
+resource "aws_lb_target_group" "group" {
+  for_each = var.target_group_configs
+
+  name     = each.key
+  port     = var.tg_port
+  protocol = var.tg_protocol
   vpc_id   = var.vpc_id
 
   health_check {
-    path                = "/"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    matcher             = "200"
+    path                = each.value.health_check_path
+    matcher             = each.value.matcher
+    interval            = var.tg_health_check_interval
+    timeout             = var.tg_health_check_timeout
+    healthy_threshold   = var.tg_healthy_threshold
+    unhealthy_threshold = var.tg_unhealthy_threshold
   }
 
   tags = {
-    Name = "tg-public"
-  }
-}
-
-resource "aws_lb_target_group" "private" {
-  name     = "tg-private"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-
-  health_check {
-    path                = "/api/"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    matcher             = "200,301"
-  }
-
-  tags = {
-    Name = "tg-private"
+    Name = each.key
   }
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.this.arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type             = "fixed-response"
+    type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
       message_body = "404 Not Found"
@@ -65,34 +47,19 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-resource "aws_lb_listener_rule" "public" {
+resource "aws_lb_listener_rule" "rules" {
+  for_each     = var.target_group_configs
   listener_arn = aws_lb_listener.http.arn
-  priority     = 200
+  priority     = each.value.listener_priority
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.public.arn
+    target_group_arn = aws_lb_target_group.group[each.key].arn
   }
 
   condition {
     path_pattern {
-      values = ["/"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "private" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 100
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.private.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/api*"]
+      values = each.value.listener_path_patterns
     }
   }
 }
