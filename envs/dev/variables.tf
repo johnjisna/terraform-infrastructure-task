@@ -245,3 +245,20 @@ variable "private_subnet_cidrs" {
   type        = list(string)
 }
 
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "aws_account_id" {
+  description = "AWS account ID"
+  type        = string
+  default     = "116981776133"
+}
+
+variable "image_tag" {
+  description = "Docker image tag"
+  type        = string
+  default     = "latest"
+}

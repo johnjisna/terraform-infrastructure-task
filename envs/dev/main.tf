@@ -40,15 +40,15 @@ module "ec2" {
       min_size          = var.scale_min_size
       max_size          = var.scale_max_size
       key_name          = "test-key"
-      user_data         = <<-EOF
-        #!/bin/bash
-        sudo apt-get update
-        sudo apt-get install -y nginx
-        sudo systemctl start nginx
-        sudo systemctl enable nginx
-        echo "Hello from $(hostname)" | sudo tee /var/www/html/index.html
-      EOF
       iam_instance_profile = module.iam_instance_profile.iam_instance_profile_name
+      
+      user_data = templatefile("${path.module}/templates/ec2_user_data.sh.tmpl", {
+        aws_account_id = var.aws_account_id
+        aws_region     = var.aws_region
+        ecr_repo       = var.ecr_repository_name
+        image_tag      = "latest"
+        secret_name    = var.secret_name
+      })
     }
 
     private = {
@@ -61,15 +61,14 @@ module "ec2" {
       min_size          = var.scale_min_size
       max_size          = var.scale_max_size
       key_name          = "test-key"
-      user_data         = <<-EOF
-        #!/bin/bash
-        sudo apt-get update
-        sudo apt-get install -y nginx
-        sudo systemctl start nginx
-        sudo systemctl enable nginx
-        echo "Hello from $(hostname)" | sudo tee /var/www/html/index.html
-      EOF
       iam_instance_profile = module.iam_instance_profile.iam_instance_profile_name
+      user_data = templatefile("${path.module}/templates/ec2_user_data.sh.tmpl", {
+        aws_account_id = var.aws_account_id
+        aws_region     = var.aws_region
+        ecr_repo       = var.ecr_repository_name
+        image_tag      = "latest"
+        secret_name    = var.secret_name
+      })
     }
   }
 }
