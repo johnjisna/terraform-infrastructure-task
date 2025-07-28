@@ -1,12 +1,45 @@
 #!/bin/bash
 set -e
 
+# Update system and install packages
 sudo apt-get update
 sudo apt-get install -y nginx unzip
 
+# Start and enable NGINX
 sudo systemctl start nginx
 sudo systemctl enable nginx
+
+# Create default index page
 echo "Hello from $(hostname)" | sudo tee /var/www/html/index.html
+
+# Create /api route content
+sudo mkdir -p /var/www/html/api
+echo "<h1>Welcome to /api</h1>" | sudo tee /var/www/html/api/index.html
+
+# Configure NGINX to serve /api route
+sudo bash -c 'cat > /etc/nginx/sites-available/default' <<'NGINX_CONF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html;
+
+    server_name _;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location /api {
+        alias /var/www/html/api/;
+        index index.html;
+    }
+}
+NGINX_CONF
+
+# Restart NGINX to apply new config
+sudo systemctl restart nginx
 
 # Install Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -37,10 +70,11 @@ unzip awscliv2.zip
 sudo ./aws/install
 rm -rf aws awscliv2.zip
 
-# Pull image from ECR
+# Authenticate with ECR
 aws ecr get-login-password --region ${aws_region} | \
 docker login --username AWS --password-stdin ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com
 
+# Pull Docker image
 docker pull ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/${ecr_repo}:${image_tag}
 
 # Fetch secret and run container

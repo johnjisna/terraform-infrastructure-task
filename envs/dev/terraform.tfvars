@@ -41,7 +41,7 @@ ecr_image_tag_mutability = "IMMUTABLE"
 environment              = "dev"
 project                  = "test"
 
-secret_name        = "test-dev-secret-version-7"
+secret_name        = "test-dev-secret-version-11"
 secret_description = "Database credentials for updated application"
 secret_values = {
   username = "postgresadmin"
