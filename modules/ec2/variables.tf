@@ -12,6 +12,7 @@ variable "ec2_configs" {
     user_data           = string
     iam_instance_profile = string
     key_name             = string
+    target_value         = number
   }))
 }
 

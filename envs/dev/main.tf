@@ -1,10 +1,20 @@
 module "vpc" {
-  source               = "../../modules/vpc"
-  vpc_cidr             = var.vpc_cidr
-  availability_zones   = var.availability_zones
-  public_subnet_cidrs  = var.public_subnet_cidrs
-  private_subnet_cidrs = var.private_subnet_cidrs
+  source                       = "../../modules/vpc"
+  vpc_cidr                     = var.vpc_cidr
+  availability_zones           = var.availability_zones
+  public_subnet_cidrs          = var.public_subnet_cidrs
+  private_subnet_cidrs         = var.private_subnet_cidrs
+
+  vpc_name                     = var.vpc_name
+  public_subnet_name_prefix    = var.public_subnet_name_prefix
+  private_subnet_name_prefix   = var.private_subnet_name_prefix
+  nat_eip_name_prefix          = var.nat_eip_name_prefix
+  nat_gateway_name_prefix      = var.nat_gateway_name_prefix
+  igw_name                     = var.igw_name
+  public_route_table_name      = var.public_route_table_name
+  private_route_table_name_prefix = var.private_route_table_name_prefix
 }
+
 
 
 
@@ -39,7 +49,7 @@ module "ec2" {
       desired_capacity  = var.scale_desired_capacity
       min_size          = var.scale_min_size
       max_size          = var.scale_max_size
-      key_name          = "test-key"
+      key_name          = "sayonetech-staging"
       iam_instance_profile = module.iam_instance_profile.iam_instance_profile_name
       
       user_data = templatefile("${path.module}/templates/ec2_user_data.sh.tmpl", {
@@ -49,6 +59,8 @@ module "ec2" {
         image_tag      = "latest"
         secret_name    = var.secret_name
       })
+
+        target_value = var.public_target_value
     }
 
     private = {
@@ -60,7 +72,7 @@ module "ec2" {
       desired_capacity  = var.scale_desired_capacity
       min_size          = var.scale_min_size
       max_size          = var.scale_max_size
-      key_name          = "test-key"
+      key_name          = "sayonetech-staging"
       iam_instance_profile = module.iam_instance_profile.iam_instance_profile_name
       user_data = templatefile("${path.module}/templates/ec2_user_data.sh.tmpl", {
         aws_account_id = var.aws_account_id
@@ -69,17 +81,23 @@ module "ec2" {
         image_tag      = "latest"
         secret_name    = var.secret_name
       })
+            
+        target_value = var.private_target_value
+   
     }
   }
 }
 
-
 module "sg" {
-  source    = "../../modules/sg"
-  vpc_id    = module.vpc.vpc_id
-  vpc_cidr  = var.vpc_cidr
-  name      = var.name
+  source             = "../../modules/sg"
+  name               = var.name
+  vpc_id             = module.vpc.vpc_id 
+  alb_ingress_rules  = var.alb_ingress_rules
+  ec2_ingress_rules  = var.ec2_ingress_rules
+  db_ingress_rules   = var.db_ingress_rules
 }
+
+
 
 
 module "rds_postgres" {

@@ -11,7 +11,6 @@ output "ec2_private_sg_id" {
 }
 
 output "db_sg_id" {
-  description = "Security group ID for RDS"
-  value       = aws_security_group.db_sg.id
+  value = aws_security_group.db_sg.id
 }
 

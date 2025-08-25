@@ -225,26 +225,6 @@ variable "policy_name" {
   type        = string
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
-  type        = string
-}
-
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
-}
-
-variable "public_subnet_cidrs" {
-  description = "List of public subnet CIDRs"
-  type        = list(string)
-}
-
-variable "private_subnet_cidrs" {
-  description = "List of private subnet CIDRs"
-  type        = list(string)
-}
-
 variable "aws_region" {
   description = "AWS region"
   type        = string
@@ -262,3 +242,95 @@ variable "image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "vpc_cidr" {
+  type = string
+}
+
+variable "availability_zones" {
+  type = list(string)
+}
+
+variable "public_subnet_cidrs" {
+  type = list(string)
+}
+
+variable "private_subnet_cidrs" {
+  type = list(string)
+}
+
+variable "public_subnet_name_prefix" {
+  default = "public-subnet"
+}
+
+variable "private_subnet_name_prefix" {
+  default = "private-subnet"
+}
+
+variable "nat_eip_name_prefix" {
+  default = "nat-eip"
+}
+
+variable "nat_gateway_name_prefix" {
+  default = "nat-gateway"
+}
+
+variable "igw_name" {
+  default = "main-igw"
+}
+
+variable "public_route_table_name" {
+  default = "public-rt"
+}
+
+variable "private_route_table_name_prefix" {
+  default = "private-rt"
+}
+
+variable "public_target_value" {
+  description = "Target CPU utilization for public EC2 auto scaling"
+  type        = number
+}
+
+variable "private_target_value" {
+  description = "Target CPU utilization for private EC2 auto scaling"
+  type        = number
+}
+
+
+variable "allowed_ssh_cidrs" {
+  type        = list(string)
+  description = "CIDRs that are allowed SSH access to EC2"
+  default     = []
+}
+
+variable "db_access_cidrs" {
+  type        = list(string)
+  description = "CIDRs that are allowed access to PostgreSQL DB"
+  default     = []
+}
+
+variable "alb_ingress_rules" {
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+}
+
+variable "ec2_ingress_rules" {
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+}
+
+variable "db_ingress_rules" {
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+}
+

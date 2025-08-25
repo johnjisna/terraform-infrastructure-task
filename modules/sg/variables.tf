@@ -1,15 +1,37 @@
-variable "vpc_id" {
-  type        = string
-  description = "VPC ID where SGs will be created"
-}
-
-variable "vpc_cidr" {
-  type        = string
-  description = "VPC CIDR for internal access"
-}
-
 variable "name" {
-  description = "Prefix name for the RDS security group"
+  description = "Base name for the security groups"
   type        = string
+}
+
+variable "vpc_id" {
+  description = "VPC ID for the security groups"
+  type        = string
+}
+
+variable "alb_ingress_rules" {
+  description = "List of ingress rules for ALB SG"
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+}
+
+variable "ec2_ingress_rules" {
+  description = "List of ingress rules for EC2 SG"
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+}
+
+variable "db_ingress_rules" {
+  description = "List of ingress rules for DB SG"
+  type = list(object({
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
 }
 

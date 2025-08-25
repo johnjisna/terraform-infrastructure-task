@@ -2,9 +2,8 @@ vpc_name            = "my-vpc"
 image_id            = "ami-020cba7c55df1f615"
 instance_type       = "t2.micro"
 
-
-vpc_cidr = "10.0.0.0/16"
-
+name               = "myapp"
+vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b"]
 
 public_subnet_cidrs = [
@@ -13,12 +12,10 @@ public_subnet_cidrs = [
 ]
 
 private_subnet_cidrs = [
-  "10.0.3.0/24",
-  "10.0.4.0/24"
+  "10.0.11.0/24",
+  "10.0.12.0/24"
 ]
 
-
-name                        = "devdb"
 username                    = "postgresadmin"
 password                    = "Admin12345"
 db_name                     = "sampledb"
@@ -26,7 +23,6 @@ engine                      = "postgres"
 engine_version              = "17.5"
 instance_class              = "db.t3.micro"
 allocated_storage           = 20
-
 publicly_accessible         = false
 multi_az                    = false
 skip_final_snapshot         = false
@@ -76,17 +72,47 @@ target_group_configs = {
   }
 
   tg-private = {
-    health_check_path      = "/"
+    health_check_path      = "/api"
     matcher                = "200,301"
     listener_priority      = 100
     listener_path_patterns = ["/api/*"]
   }
 }
 
-
 scale_min_size         = 1
 scale_max_size         = 2
 scale_desired_capacity = 1
 scale_target_cpu       = 50
 
+public_target_value  = 60.0
+private_target_value = 50.0
+
+alb_ingress_rules = [
+  {
+    port        = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+]
+
+ec2_ingress_rules = [
+  {
+    port        = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  },
+  {
+    port        = 22
+    protocol    = "tcp"
+    cidr_blocks = ["115.245.232.43/32"]
+  }
+]
+
+db_ingress_rules = [
+  {
+    port        = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+]
 

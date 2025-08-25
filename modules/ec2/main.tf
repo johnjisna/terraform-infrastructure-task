@@ -50,7 +50,8 @@ resource "aws_autoscaling_policy" "ec2_target_tracking_policy" {
     predefined_metric_specification {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
-    target_value = 50.0
+    target_value = each.value.target_value
+
   }
 }
 
